@@ -1,0 +1,76 @@
+<!-- templates/edit.html -->
+<!doctype html>
+<html>
+
+<head>
+    <title>Edit Image</title>
+    <style>
+        /* Basic styling */
+        .slider-container,
+        .effects-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .slider-value {
+            display: inline-block;
+            width: 50px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Edit Image</h1>
+    <!-- Display the current image -->
+    <img id="image" src="{{ image_url }}" alt="Image" style="max-width:500px;">
+
+    <!-- Form to apply edits -->
+    <form id="edit-form" action="{{ url_for('apply_edit') }}" method="post">
+        <!-- Slider to adjust brightness -->
+        <div class="slider-container">
+            <label class="slider-label" for="brightness">Brightness:</label>
+            <input type="range" id="brightness" name="brightness" min="0" max="200" value="{{ brightness_value }}">
+            <span class="slider-value" id="brightness-value">{{ brightness_value }}%</span>
+        </div>
+
+        <!-- Options for negative and solarize effects -->
+        <div class="effects-container">
+            <!-- In edit.html -->
+            <input type="radio" id="none" name="effect" value="none" {% if selected_effect=='none' %}checked{% endif %}>
+            <label for="none">None</label><br>
+            <input type="radio" id="negative" name="effect" value="negative" {% if selected_effect=='negative'
+                %}checked{% endif %}>
+            <label for="negative">Negative</label><br>
+            <input type="radio" id="solarize" name="effect" value="solarize" {% if selected_effect=='solarize'
+                %}checked{% endif %}>
+            <label for="solarize">Solarize</label>
+
+        </div>
+
+        <!-- Submit button -->
+        <input type="submit" value="Apply Edit">
+    </form>
+
+    <!-- JavaScript to update brightness value display -->
+    <script>
+        const brightnessSlider = document.getElementById('brightness');
+        const brightnessValue = document.getElementById('brightness-value');
+
+        brightnessSlider.addEventListener('input', function () {
+            brightnessValue.textContent = brightnessSlider.value + '%';
+        });
+    </script>
+
+    <!-- Links to download or reupload -->
+    <br>
+    <a href="{{ url_for('download_image') }}">Download Edited Image</a>
+    <br>
+    <a href="{{ url_for('reupload') }}">Upload a New Image</a>
+</body>
+
+</html>

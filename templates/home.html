@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Image Editing App</title>
+</head>
+
+<body>
+    <h1>Upload Image</h1>
+    <form action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+
+</html>
