@@ -39,7 +39,41 @@ def adjust_brightness(image_array, factor=1.0):
         print(f"Error adjusting brightness: {e}")
         return None
 
+def resize_image(image_array, new_size=(256, 256)):
+    old_height, old_width, old_channels = image_array.shape
+    resized_image = np.zeros((new_size[1], new_size[0], old_channels), dtype=np.uint8)
 
+    x_ratio = old_width / new_size[0]
+    y_ratio = old_height / new_size[1]
+
+    for y in range(new_size[1]):
+        for x in range(new_size[0]):
+            px = int(x * x_ratio)
+            py = int(y * y_ratio)
+            resized_image[y, x] = image_array[py, px]
+    return Image.fromarray(resized_image)
+
+def parse_hex_color(hex_color):
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) != 6:
+        raise ValueError("Invalid hex color")
+    r = int(hex_color[:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:], 16)
+    return (r, g, b)
+
+def add_border(image_array, border_size=10, color="#000000"):
+    (r, g, b) = parse_hex_color(color)
+    old_h, old_w, channels = image_array.shape
+    new_h = old_h + border_size * 2
+    new_w = old_w + border_size * 2
+
+    new_image = np.zeros((new_h, new_w, channels), dtype=image_array.dtype)
+    new_image[:, :] = [r, g, b]
+
+    new_image[border_size:old_h + border_size, border_size:old_w + border_size] = image_array
+    return Image.fromarray(new_image)
+"""
 def test_image_edit():
 
     image_path = "/home/pospim/Desktop/python/semestr/utils/star_wars.jpg"
@@ -53,6 +87,8 @@ def test_image_edit():
     solarized_image = solarize_image(image_array)
     darkened_image = darken_image(image_array)
     lightened_image = lighten_image(image_array)
+
 if __name__ == '__main__':
     test_image_edit()
     print("Image edit test passed!")
+"""

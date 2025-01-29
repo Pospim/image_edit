@@ -4,6 +4,14 @@ from werkzeug.utils import secure_filename
 from utils.image_edit import *
 import numpy as np
 import os, time
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -50,11 +58,24 @@ def edit_image():
     if 'current_image' not in session:
         return redirect(url_for('home'))
     filename = session['current_image']
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image = Image.open(image_path)
+    width, height = image.size
+    brightness_val = session.get('brightness', 100)
+
+    resize_w = session.get('resize_width', width)
+    resize_h = session.get('resize_height', height)
+
     timestamp = str(time.time())
     image_url = url_for('uploaded_file', filename=filename) + f'?t={timestamp}'
-    brightness_val = session.get('brightness', 100)
-    effect = session.get('selected_effect', 'none')
-    return render_template('edit.html', image_url=image_url, brightness=brightness_val, selected_effect=effect)
+
+    return render_template(
+        'edit.html',
+        image_url=image_url,
+        brightness=brightness_val,
+        resize_width=resize_w,
+        resize_height=resize_h
+    )
 
 @app.route('/apply_edit', methods=['POST'])
 def apply_edit():
@@ -66,25 +87,33 @@ def apply_edit():
         image = Image.open(image_path)
         if image.mode != 'RGB':
             image = image.convert('RGB')
-        image_array = np.array(image)
 
+        # Brightness
         brightness_val = request.form.get('brightness', type=int)
         if brightness_val is None:
             brightness_val = 100
         session['brightness'] = brightness_val
-        # why not straight away use brightness_val / 100.0?
         brightness_factor = brightness_val / 100.0
 
-        effect = request.form.get('effect', 'none')
-        session['selected_effect'] = effect
+        # Resize
+        new_w = request.form.get('resize_width', type=int)
+        new_h = request.form.get('resize_height', type=int)
+        session['resize_width'] = new_w
+        session['resize_height'] = new_h
 
-        edited_image = adjust_brightness(image_array, brightness_factor)
+        effect = request.form.get('effect', 'none')
+        edited_image = adjust_brightness(np.array(image), brightness_factor)
+        edited_array = np.array(edited_image)
+        edited_image = resize_image(edited_array, new_size=(new_w, new_h))
 
         if effect == 'negative':
-             edited_image = negative_image(np.array(edited_image))
+             edited_image = negative_image(edited_array)
         elif effect == 'solarize':
-             edited_image = solarize_image(np.array(edited_image))
-
+             edited_image = solarize_image(edited_array)
+        elif effect == 'border':
+            border_color = request.form.get('border_color', '#000000')
+            border_size = request.form.get('border_size', 10, type=int)
+            edited_image = add_border(edited_array, border_size, border_color)
         edited_image.save(image_path)
     except Exception as e:
         print(f"Error editing image: {e}")

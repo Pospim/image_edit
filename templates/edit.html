@@ -27,10 +27,11 @@
 <body>
     <h1>Edit Image</h1>
     <!-- Display the current image -->
-    <img id="image" src="{{ image_url }}" alt="Image" style="max-width:500px;">
+    <img id="image" src="{{ image_url }}" alt="Image" style="max-width:1000px;">
 
     <!-- Form to apply edits -->
     <form id="edit-form" action="{{ url_for('apply_edit') }}" method="post">
+
         <!-- Slider to adjust brightness -->
         <div class="slider-container">
             <label class="slider-label" for="brightness">Brightness:</label>
@@ -38,32 +39,62 @@
             <span class="slider-value" id="brightness-value">{{ brightness_value }}%</span>
         </div>
 
+        <!-- Slider to adjust width -->
+        <div class="slider-container">
+            <label class="slider-label" for="resize_width">Width:</label>
+            <input type="range" id="resize_width" name="resize_width" min="1" max="2000" value="{{ resize_width }}">
+            <span class="slider-value" id="resize_width-value">{{ resize_width }}px </span>
+        </div>
+        <!-- Slider to adjust height -->
+        <div class="slider-container">
+            <label class="slider-label" for="resize_height">Height:</label>
+            <input type="range" id="resize_height" name="resize_height" min="1" max="2000" value="{{ resize_height }}">
+            <span class="slider-value" id="resize_height-value">{{ resize_height }}px </span>
+        </div>
         <!-- Options for negative and solarize effects -->
         <div class="effects-container">
             <!-- In edit.html -->
-            <input type="radio" id="none" name="effect" value="none" {% if selected_effect=='none' %}checked{% endif %}>
-            <label for="none">None</label><br>
             <input type="radio" id="negative" name="effect" value="negative" {% if selected_effect=='negative'
                 %}checked{% endif %}>
             <label for="negative">Negative</label><br>
             <input type="radio" id="solarize" name="effect" value="solarize" {% if selected_effect=='solarize'
                 %}checked{% endif %}>
-            <label for="solarize">Solarize</label>
-
+            <label for="solarize">Solarize</label><br>
+            <!-- Border radio button -->
+            <input type="radio" id="border" name="effect" value="border" {% if selected_effect=='border' %}checked{%
+                endif %}>
+            <label for="border">Border</label><br>
+            <label for="border_color">Color:</label>
+            <input type="color" id="border_color" name="border_color" value="#000000" />
+            <label for="border_size">Size (px):</label>
+            <input type="number" id="border_size" name="border_size" value="10" min="1" max="50" />
         </div>
 
         <!-- Submit button -->
         <input type="submit" value="Apply Edit">
     </form>
 
-    <!-- JavaScript to update brightness value display -->
+    <!-- JavaScript to update slider value display -->
     <script>
+        // Brightness
         const brightnessSlider = document.getElementById('brightness');
         const brightnessValue = document.getElementById('brightness-value');
-
         brightnessSlider.addEventListener('input', function () {
             brightnessValue.textContent = brightnessSlider.value + '%';
         });
+        // Width
+        const resizeWidthSlider = document.getElementById('resize_width');
+        const resizeWidthValue = document.getElementById('resize_width-value');
+        resizeWidthSlider.addEventListener('input', function () {
+            resizeWidthValue.textContent = resizeWidthSlider.value + 'px';
+        });
+        // Height
+        const resizeHeightSlider = document.getElementById('resize_height');
+        const resizeHeightValue = document.getElementById('resize_height-value');
+        resizeHeightSlider.addEventListener('input', function () {
+            resizeHeightValue.textContent = resizeHeightSlider.value + 'px';
+        });
+
     </script>
 
     <!-- Links to download or reupload -->
